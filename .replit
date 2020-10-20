@@ -1,2 +1,1 @@
-language = "sqlite"
-run = " main.sql"
+language = "bash"
