@@ -13,6 +13,14 @@ create table user_ (
   unique (phone_number, email)
 )
 
+//https://gist.github.com/abroadbent/6233480
+create table country(
+  id serial primary_key,
+  name_of_country text unqi,
+  tax integer not null check(tax >= 0)
+) 
+
+
 create table house (
   id SERIAL primary key,
   country_id int foreign key references country(id),
@@ -51,13 +59,6 @@ create table comfort_with_house (
     id_house foreign key references house(id),
     id_comfort foreign key references comfort(id),
     primary key (id_house, id_comfort)
-)
-
-//https://gist.github.com/abroadbent/6233480
-create table county(
-  id serial primary_key,
-  name_of_country text unqi,
-  tax integer not null check(tax >= 0)
 ) 
 
 create table reviews_for_house(
@@ -69,6 +70,6 @@ create table reviews_for_house(
   friendliness integer not null (check >= 1 and check <= 5),
   addition_value integer not null (check >= 1 and check <= 5),
   //подумать еще над критериями
-  check application_rent(id).status == "accepted"
+  //check application_rent(id).status == "accepted"
   //проверка на статус такой заявки и корректность id
 )
