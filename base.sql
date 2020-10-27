@@ -1,4 +1,4 @@
-create table user (
+create table user_ (
   id serial primary key,
   name_ nvarchar(255) not null,
   sername nvarchar(255) not null,
@@ -35,8 +35,40 @@ create table price_for_week(
 ) 
 
 create table application_rent(
+  id SERIAL primary key,
   date_residence date,
   house_id int foreign key references house(id),
   descr_of_aplication text,
   status enum("declined", "under consideration", "accepted") not null default "under consideration"
+)
+
+create table comfort(
+  id serial primary_key,
+  comfort_name nvarchar(255) unique not null
+)
+
+create table comfort_with_house (
+    id_house foreign key references house(id),
+    id_comfort foreign key references comfort(id),
+    primary key (id_house, id_comfort)
+)
+
+//https://gist.github.com/abroadbent/6233480
+create table county(
+  id serial primary_key,
+  name_of_country text unqi,
+  tax integer not null check(tax >= 0)
+) 
+
+create table reviews_for_house(
+  user_id integer foreign_key references user_(id) (check user_(id).tenant == 1 ),//?? потом чекним
+  house_id integer foreign_key references house(id),
+  application_id integer foreign_key references application_rent(id),
+  location_convenience integer not null (check >= 1 and check <= 5),
+  purity integer not null (check >= 1 and check <= 5),
+  friendliness integer not null (check >= 1 and check <= 5),
+  addition_value integer not null (check >= 1 and check <= 5),
+  //подумать еще над критериями
+  check application_rent(id).status == "accepted"
+  //проверка на статус такой заявки и корректность id
 )
