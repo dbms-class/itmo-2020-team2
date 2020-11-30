@@ -48,7 +48,7 @@ class App(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def countries(self):
-        sql = """select id, name_of_country from country"""
+        sql = "select id, name_of_country from country"
         with create_connection(self.args) as db:
             cur = db.cursor()
             cur.execute(sql)
@@ -79,6 +79,36 @@ class App(object):
                 result.append({"id": house[0], "description_of_house": house[3], "address_of_house": house[2],
                                "country_id": house[1]})
             return result
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def get_price(self, country_id, week, max_price=None, bed_count=None):
+        if not max_price and not bed_count:
+            sql = f"select id, description_of_house, beds_number, week, sum(default_price, cleaning_price) as price " \
+                  f"from house where id not in (select house_id from application_rent where number_of_week = {week})" \
+                               f"and country_id = {country_id}"\
+
+        #"SELECT house_id, price from price_for_week where number_of_week = %s"
+
+        if not max_price and bed_count:
+            sql =
+
+        if max_price and not bed_count:
+            sql =
+
+        else:
+            sql =
+
+        with create_connection(self.args) as db:
+            cur = db.cursor()
+            cur.execute(sql)
+            result = []
+            houses = cur.fetchall()
+            for house in houses:
+                result.append({"id": house[0], "apartment_name": house[1], "bed_count": house[2],
+                               "week": house[3], "price": house[4]})
+            return result
+
 
 
 cherrypy.config.update({
