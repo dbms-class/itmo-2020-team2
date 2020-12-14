@@ -64,13 +64,13 @@ create type app_status as enum ('accepted', 'declined', 'under consideration');
 DROP TABLE IF EXISTS application_rent CASCADE;
 create table application_rent(
   id serial primary key,
-  date_residence_start date not null,
-  date_residence_end date not null,
+  number_of_week integer not null,
   house_id int references house(id),
   descr_of_aplication varchar(255),
   final_price integer not null,
-  check (date_residence_start <= date_residence_end), -- проверяем правильность дат
+  check (final_price > 0)
   status app_status not null default 'under consideration'
+  unique (number_of_week, house_id)
 );
 
 --comfort - справочник возможных удобств 

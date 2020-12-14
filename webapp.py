@@ -48,7 +48,7 @@ class App(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def countries(self):
-        sql = """select id, name_of_country from country"""
+        sql = "select id, name_of_country from country"
         with create_connection(self.args) as db:
             cur = db.cursor()
             cur.execute(sql)
