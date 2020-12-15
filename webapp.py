@@ -135,14 +135,14 @@ class App(object):
             custom_prices = self.get_custom_prices(cursor, country_id, week, bed_count)
 
         houses = self.replace_prices(houses, custom_prices)
-        if max_price is not None:
-            houses = list(filter(lambda x: x[3] <= max_price, houses))
         prices = list(map(lambda x: x[3], houses))
         max_found_price = max(prices)
         min_found_price = min(prices)
 
         result = []
         for house in houses:
+            if house[3] > max_price:
+                continue
             result.append({"id": house[0], "apartment_name": house[1], "bed_count": house[2],
                            "week": week, "price": house[3],
                            "max_price": max_found_price, "min_price": min_found_price})
