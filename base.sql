@@ -10,9 +10,6 @@ create table user_of_site (
   gender sex not null default 'None',
   birthday date,
   photo_url varchar(255)
-  -- landlord boolean not null default(false),
-  -- tenant boolean not null default(false),
-  -- check (landlord or tenant = true)
 );
 
 
@@ -44,7 +41,8 @@ create table house (
   check (room_number > 0 and beds_number > 0 and max_people > 0),
   check (default_price > 0 and cleaning_price > 0),
   check (longitude >= -90.00 and longitude <= 90.00),
-  check (latitude >= -180.00 and latitude <= 180.00)
+  check (latitude >= -180.00 and latitude <= 180.00),
+  unique (country_id, address_of_house)
 );
 
 --price_for_week - таблица с указанием цены за неделю, неделю обозначаем
@@ -55,7 +53,7 @@ create table price_for_week(
   number_of_week integer not null,
   check (number_of_week > 0 and number_of_week <= 53),
   check (price >= 0),
-  unique (house_id, number_of_week)
+  primary key (house_id, number_of_week)
   -- запись на одну и ту же неделю для одного дома должна быть уникальна
 );
 
@@ -64,13 +62,14 @@ create type app_status as enum ('accepted', 'declined', 'under consideration');
 DROP TABLE IF EXISTS application_rent CASCADE;
 create table application_rent(
   id serial primary key,
+  tenant_id integer references user_of_site(id),
   number_of_week integer not null,
   house_id int references house(id),
   descr_of_aplication varchar(255),
   final_price integer not null,
-  check (final_price > 0)
-  status app_status not null default 'under consideration'
-  unique (number_of_week, house_id)
+  check (final_price > 0),
+  status app_status not null default 'under consideration',
+  primary key (number_of_week, house_id)
 );
 
 --comfort - справочник возможных удобств 
@@ -134,5 +133,7 @@ create table entertainment(
   datе_start date not null,
   datе_end date not null,
   genre_id integer not null references genre(id),
-  check (datе_start <= datе_end)
+  check (datе_start <= datе_end),
+  check (longitude >= -90.00 and longitude <= 90.00),
+  check (latitude >= -180.00 and latitude <= 180.00)
 );
