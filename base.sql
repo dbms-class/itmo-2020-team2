@@ -1,6 +1,5 @@
 --user_of_site  - таблица пользователей сервиса, роль потльзователя определяется в полях landlord, tenant, какая-то из них обязательно должна быть, но может быть и обе сразу
 create type sex as enum ('female','male', 'None');
-
 DROP TABLE IF EXISTS user_of_site CASCADE;
 create table user_of_site (
   id serial primary key,
@@ -9,16 +8,13 @@ create table user_of_site (
   email varchar(255) unique not null,
   phone_number varchar(255) unique not null,
   gender sex not null default 'None',
-  bithday date,
-  photo_url varchar(255),
-  landlord boolean not null default(false),
-  tenant boolean not null default(false),
-  check (landlord or tenant = true)
+  birthday date,
+  photo_url varchar(255)
 );
 
 
 --https://gist.github.com/abroadbent/6233480
---country - справочник стран с комиссией сервиса, которая не может быть меньше 0 
+--country - справочник стран с комиссией сервиса, которая не может быть меньше 0
 DROP TABLE IF EXISTS country CASCADE;
 create table country(
   id serial primary key,
@@ -26,14 +22,14 @@ create table country(
   tax integer not null check(tax >= 0)
 );
 
---house - таблица информации о домах. Цена за аренду определяется следующим образом: арендодатель назначает постоянную цену, которая будет показана сервисом, при этом может дополнительно задать промежутки, в которых стоимость меняется и указывает её, дополнительные цены хранятся в таблице price_for_week 
---Так же пользователь может указать цену за клининг   
+--house - таблица информации о домах. Цена за аренду определяется следующим образом: арендодатель назначает постоянную цену, которая будет показана сервисом, при этом может дополнительно задать промежутки, в которых стоимость меняется и указывает её, дополнительные цены хранятся в таблице price_for_week
+--Так же пользователь может указать цену за клининг
 DROP TABLE IF EXISTS house CASCADE;
 create table house (
   id serial primary key,
   landlord_id integer not null references user_of_site(id),
   country_id integer not null references country(id),
-  adress varchar(255) not null,
+  address_of_house varchar(255) not null,
   longitude numeric(2) not null,
   latitude numeric(2) not null,
   description_of_house text not null,
@@ -45,10 +41,11 @@ create table house (
   check (room_number > 0 and beds_number > 0 and max_people > 0),
   check (default_price > 0 and cleaning_price > 0),
   check (longitude >= -90.00 and longitude <= 90.00),
-  check (latitude >= -180.00 and latitude <= 180.00)
+  check (latitude >= -180.00 and latitude <= 180.00),
+  unique (country_id, address_of_house)
 );
 
---price_for_week - таблица с указанием цены за неделю, неделю обозначаем 
+--price_for_week - таблица с указанием цены за неделю, неделю обозначаем
 DROP TABLE IF EXISTS price_for_week CASCADE;
 create table price_for_week(
   house_id integer not null references house(id),
@@ -56,7 +53,7 @@ create table price_for_week(
   number_of_week integer not null,
   check (number_of_week > 0 and number_of_week <= 53),
   check (price >= 0),
-  unique (house_id, number_of_week)
+  primary key (house_id, number_of_week)
   -- запись на одну и ту же неделю для одного дома должна быть уникальна
 );
 
@@ -65,12 +62,14 @@ create type app_status as enum ('accepted', 'declined', 'under consideration');
 DROP TABLE IF EXISTS application_rent CASCADE;
 create table application_rent(
   id serial primary key,
-  date_residence_start date not null,
-  date_residence_end date not null,
+  tenant_id integer references user_of_site(id),
+  number_of_week integer not null,
   house_id int references house(id),
   descr_of_aplication varchar(255),
-  check (date_residence_start <= date_residence_end), -- проверяем правильность дат
-  status app_status not null default 'under consideration'
+  final_price integer not null,
+  check (final_price > 0),
+  status app_status not null default 'under consideration',
+  primary key (number_of_week, house_id)
 );
 
 --comfort - справочник возможных удобств 
@@ -134,5 +133,7 @@ create table entertainment(
   datе_start date not null,
   datе_end date not null,
   genre_id integer not null references genre(id),
-  check (datе_start <= datе_end)
+  check (datе_start <= datе_end),
+  check (longitude >= -90.00 and longitude <= 90.00),
+  check (latitude >= -180.00 and latitude <= 180.00)
 );
